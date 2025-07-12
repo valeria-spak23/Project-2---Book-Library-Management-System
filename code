@@ -1,0 +1,208 @@
+#include <iostream>
+#include <cstring>
+using namespace std;
+
+const int MAX_BOOKS = 100;
+
+struct Book {
+    char title[100];
+    char author[100];
+    char ISBN[20];
+    bool isBorrowed;
+    char borrowerName[100];
+};
+
+Book library[MAX_BOOKS];
+int bookCount = 0;
+
+bool isSubstringMatch(const char source[], const char pattern[]) {
+    int lenSource = strlen(source);
+    int lenPattern = strlen(pattern);
+    for (int i = 0; i <= lenSource - lenPattern; i++) {
+        bool match = true;
+        for (int j = 0; j < lenPattern; j++) {
+            char a = source[i + j];
+            char b = pattern[j];
+            if (a >= 'A' && a <= 'Z') a += 32;
+            if (b >= 'A' && b <= 'Z') b += 32;
+            if (a != b) {
+                match = false;
+                break;
+            }
+        }
+        if (match) return true;
+    }
+    return false;
+}
+
+void addBook() {
+    if (bookCount >= MAX_BOOKS) {
+        cout << "Library full\n";
+        return;
+    }
+
+    Book books;
+    cout << "Enter title: ";
+    cin.ignore();
+    cin.getline(books.title, 100);
+    cout << "Enter author: ";
+    cin.getline(books.author, 100);
+    cout << "Enter ISBN: ";
+    cin.getline(books.ISBN, 20);
+
+    bool duplicate = false;
+    for (int i = 0; i < bookCount; i++) {
+        if (strcmp(library[i].ISBN, books.ISBN) == 0) {
+            duplicate = true;
+            break;
+        }
+    }
+
+    if (duplicate) {
+        cout << "Duplicate ISBN\n";
+        return;
+    }
+
+    books.isBorrowed = false;
+    books.borrowerName[0] = '\0';
+
+    library[bookCount] = books;
+    bookCount++;
+    cout << "Book added\n";
+}
+
+void searchByTitle() {
+    char search[100];
+    cout << "Enter title to search: ";
+    cin.ignore();
+    cin.getline(search, 100);
+
+    bool found = false;
+    for (int i = 0; i < bookCount; i++) {
+        if (isSubstringMatch(library[i].title, search)) {
+            cout << "Title: " << library[i].title << "\n";
+            cout << "Author: " << library[i].author << "\n";
+            cout << "ISBN: " << library[i].ISBN << "\n";
+            if (library[i].isBorrowed)
+                cout << "Borrowed by: " << library[i].borrowerName << "\n";
+            else
+                cout << "Available\n";
+            found = true;
+        }
+    }
+    if (!found)
+        cout << "No matching books found\n";
+}
+
+void searchByAuthor() {
+    char search[100];
+    cout << "Enter author to search: ";
+    cin.ignore();
+    cin.getline(search, 100);
+
+    bool found = false;
+    for (int i = 0; i < bookCount; i++) {
+        if (isSubstringMatch(library[i].author, search)) {
+            cout << "Title: " << library[i].title << "\n";
+            cout << "Author: " << library[i].author << "\n";
+            cout << "ISBN: " << library[i].ISBN << "\n";
+            if (library[i].isBorrowed)
+                cout << "Borrowed by: " << library[i].borrowerName << "\n";
+            else
+                cout << "Available\n";
+            found = true;
+        }
+    }
+    if (!found)
+        cout << "No matching books found\n";
+}
+
+void displayAllBooks() {
+    if (bookCount == 0) {
+        cout << "No books in the library\n";
+        return;
+    }
+    for (int i = 0; i < bookCount; i++) {
+        cout << "Title: " << library[i].title << "\n";
+        cout << "Author: " << library[i].author << "\n";
+        cout << "ISBN: " << library[i].ISBN << "\n";
+        if (library[i].isBorrowed)
+            cout << "Borrowed by: " << library[i].borrowerName << "\n";
+        else
+            cout << "Available\n";
+        cout << "\n";
+    }
+}
+
+void borrowBook() {
+    char isbn[20];
+    cout << "Enter ISBN to borrow: ";
+    cin.ignore();
+    cin.getline(isbn, 20);
+
+    for (int i = 0; i < bookCount; i++) {
+        if (strcmp(library[i].ISBN, isbn) == 0) {
+            if (library[i].isBorrowed) {
+                cout << "Book already borrowed\n";
+                return;
+            }
+            cout << "Enter your name: ";
+            cin.getline(library[i].borrowerName, 100);
+            library[i].isBorrowed = true;
+            cout << "Book borrowed\n";
+            return;
+        }
+    }
+    cout << "Book not found\n";
+}
+
+void returnBook() {
+    char isbn[20];
+    cout << "Enter ISBN to return: ";
+    cin.ignore();
+    cin.getline(isbn, 20);
+
+    for (int i = 0; i < bookCount; i++) {
+        if (strcmp(library[i].ISBN, isbn) == 0) {
+            if (!library[i].isBorrowed) {
+                cout << "Book is not borrowed\n";
+                return;
+            }
+            library[i].isBorrowed = false;
+            library[i].borrowerName[0] = '\0';
+            cout << "Book returned\n";
+            return;
+        }
+    }
+    cout << "Book not found\n";
+}
+
+int main() {
+    int choice;
+    do {
+        cout << "Book Library Management System\n";
+        cout << "1. Add New Book\n";
+        cout << "2. Search for Books by Title\n";
+        cout << "3. Search for Books by Author\n";
+        cout << "4. Display All Books\n";
+        cout << "5. Borrow a Book\n";
+       cout << "6. Return a Book\n";
+        cout << "7. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1: addBook(); break;
+            case 2: searchByTitle(); break;
+            case 3: searchByAuthor(); break;
+            case 4: displayAllBooks(); break;
+            case 5: borrowBook(); break;
+            case 6: returnBook(); break;
+            case 7: cout << "Goodbye\n"; break;
+            default: cout << "Invalid option\n";
+        }
+
+        cout << "\n";
+    } while (choice != 7);
+
+    return 0;}
